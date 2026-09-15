@@ -17,3 +17,9 @@ variable "vpc_name" {
   type    = string
   default = "oficina-vpc"
 }
+variable "datadog_api_key" {
+  description = "Datadog API Key"
+  type        = string
+  sensitive   = true
+  default     = "a_preencher"
+}

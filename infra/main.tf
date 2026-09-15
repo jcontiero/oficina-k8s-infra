@@ -20,3 +20,10 @@ module "artifact_registry" {
   region        = var.region
   repository_id = "oficina-docker"
 }
+
+module "datadog" {
+  source          = "./modules/datadog"
+  datadog_api_key = var.datadog_api_key
+
+  depends_on = [module.gke]
+}
