@@ -16,6 +16,11 @@ resource "helm_release" "datadog_agent" {
   }
 
   set {
+    name  = "datadog.clusterName"
+    value = var.cluster_name
+  }
+
+  set {
     name  = "datadog.logs.enabled"
     value = "true"
   }
@@ -28,6 +33,16 @@ resource "helm_release" "datadog_agent" {
   set {
     name  = "datadog.apm.portEnabled"
     value = "true"
+  }
+
+  set {
+    name  = "datadog.apm.hostPort"
+    value = "8126"
+  }
+
+  set {
+    name  = "datadog.systemProbe.enableDefaultKernelHeadersPaths"
+    value = "false"
   }
 
   set {
