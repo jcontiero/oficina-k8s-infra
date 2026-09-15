@@ -1,46 +1,25 @@
-output "environment" {
-  description = "Ambiente provisionado"
-  value       = var.environment
+output "vpc_network_name" {
+  value       = module.vpc.network_name
+  description = "Nome da VPC para ser consumida pelo modulo de banco e serverless"
 }
 
-output "cluster_name" {
-  description = "Nome do cluster Kubernetes"
-  value       = module.cluster.cluster_name
+output "serverless_connector_name" {
+  value       = module.vpc.connector_name
+  description = "Nome do Serverless VPC Access connector para as Cloud Functions (R-04)"
 }
 
-output "kubeconfig_path" {
-  description = "Caminho do kubeconfig gerado"
-  value       = module.cluster.kubeconfig_path
+output "gke_cluster_name" {
+  value       = module.gke.cluster_name
+  description = "Nome do cluster GKE"
 }
 
-output "kubectl_command" {
-  description = "Comando para acessar o cluster com kubectl"
-  value       = "kubectl --kubeconfig=${module.cluster.kubeconfig_path} cluster-info"
-}
-
-
-output "postgres_namespace" {
-  description = "Namespace do PostgreSQL"
-  value       = module.database.namespace
-}
-
-output "postgres_service_name" {
-  description = "Nome do service interno do PostgreSQL"
-  value       = module.database.service_name
-}
-
-output "postgres_connection_string" {
-  description = "String de conexão com o PostgreSQL (driver pg8000)"
-  value       = module.database.connection_string
+output "gke_cluster_endpoint" {
+  value       = module.gke.cluster_endpoint
   sensitive   = true
+  description = "Endpoint do cluster GKE"
 }
 
-output "next_steps" {
-  description = "Próximos passos após o provisionamento"
-  value       = <<EOT
-1. Configure o kubectl: export KUBECONFIG=${module.cluster.kubeconfig_path}
-2. Verifique o cluster: kubectl cluster-info
-3. Verifique o PostgreSQL: kubectl get pods -n ${module.database.namespace}
-4. Aplique os manifestos em /k8s: kubectl apply -f k8s/
-EOT
+output "artifact_registry_repo" {
+  value       = module.artifact_registry.repository_id
+  description = "Repositorio Docker no Artifact Registry"
 }

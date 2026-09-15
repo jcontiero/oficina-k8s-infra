@@ -1,34 +1,22 @@
-locals {
-  kubeconfig_path = var.kubeconfig_path != "" ? var.kubeconfig_path : "${path.module}/kubeconfig"
+module "vpc" {
+  source   = "./modules/vpc"
+  vpc_name = var.vpc_name
+  region   = var.region
 }
 
-# -----------------------------------------------------------------------------
-# Cluster Kubernetes local via kind
-# -----------------------------------------------------------------------------
-module "cluster" {
-  source = "./modules/cluster"
-
-  cluster_name       = var.cluster_name
-  kubernetes_version = var.kubernetes_version
-  kubeconfig_path    = local.kubeconfig_path
-  http_host_port     = var.http_host_port
-  https_host_port    = var.https_host_port
+module "gke" {
+  source       = "./modules/gke"
+  project_id   = var.project_id
+  region       = var.region
+  cluster_name = var.cluster_name
+  network_id   = module.vpc.network_id
+  subnet_name  = module.vpc.subnet_name
+  node_count   = 1
+  machine_type = "e2-medium"
 }
 
-# Registry será o Docker Hub (conforme definido no plano)
-
-# -----------------------------------------------------------------------------
-# PostgreSQL dentro do cluster via Helm
-# -----------------------------------------------------------------------------
-module "database" {
-  source = "./modules/database"
-
-  kubeconfig_path  = module.cluster.kubeconfig_path
-  namespace        = var.postgres_namespace
-  release_name     = var.postgres_release_name
-  chart_version    = var.postgres_chart_version
-  database         = var.postgres_database
-  username         = var.postgres_username
-  password         = var.postgres_password
-  persistence_size = var.postgres_persistence_size
+module "artifact_registry" {
+  source        = "./modules/artifact_registry"
+  region        = var.region
+  repository_id = "oficina-docker"
 }
