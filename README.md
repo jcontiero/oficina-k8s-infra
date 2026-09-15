@@ -1,4 +1,7 @@
 # Oficina Mecânica - Infraestrutura GKE e Rede
+[![Quality gate](https://sonarcloud.io/api/project_badges/quality_gate?project=jcontiero_oficina-k8s-infra)](https://sonarcloud.io/summary/new_code?id=jcontiero_oficina-k8s-infra)
+[![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=jcontiero_oficina-k8s-infra&metric=vulnerabilities)](https://sonarcloud.io/summary/new_code?id=jcontiero_oficina-k8s-infra)
+
 
 ## Propósito
 Este repositório provisiona a camada de orquestração de containers da aplicação e as integrações fundamentais com ferramentas de monitoramento.
