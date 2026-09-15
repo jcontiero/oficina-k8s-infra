@@ -47,4 +47,11 @@ resource "google_container_node_pool" "primary_nodes" {
     auto_repair  = true
     auto_upgrade = true
   }
+
+  lifecycle {
+    ignore_changes = [
+      node_config[0].resource_labels,
+      node_config[0].kubelet_config
+    ]
+  }
 }
