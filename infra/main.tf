@@ -21,10 +21,11 @@ module "artifact_registry" {
   repository_id = "oficina-docker"
 }
 
-# Desabilitado para a entrega pois a conta trial exige e-mail corporativo
-# module "datadog" {
-#   source          = "./modules/datadog"
-#   datadog_api_key = var.datadog_api_key
-# 
-#   depends_on = [module.gke]
-# }
+module "datadog" {
+  source          = "./modules/datadog"
+  datadog_api_key = var.datadog_api_key
+  datadog_site    = var.datadog_site
+  cluster_name    = var.cluster_name
+
+  depends_on = [module.gke]
+}
