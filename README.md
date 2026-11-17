@@ -26,7 +26,7 @@ Este repositório provisiona a camada de plataforma compartilhada de rede e orqu
 
 | Variável | Default | Descrição |
 | :--- | :--- | :--- |
-| `project_id` | `pos-fiap-2026` | ID do projeto GCP |
+| `project_id` | `fiap-project-514922` | ID do projeto GCP (Project Number `936717667971`) |
 | `region` | `us-east1` | Região dos recursos |
 | `cluster_name` | `oficina-gke-cluster` | Nome do cluster GKE Standard |
 | `vpc_name` | `oficina-vpc` | Nome da VPC compartilhada |
