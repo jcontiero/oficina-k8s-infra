@@ -1,12 +1,29 @@
 resource "helm_release" "datadog_agent" {
-  count            = var.datadog_api_key != "" && var.datadog_api_key != "a_preencher" ? 1 : 0
+  count            = var.enabled ? 1 : 0
   name             = "datadog"
   repository       = "https://helm.datadoghq.com"
   chart            = "datadog"
+  version          = "3.274.0"
   namespace        = "datadog"
   create_namespace = true
 
-  set {
+  lifecycle {
+    precondition {
+      condition     = length(var.datadog_api_key) > 0 && var.datadog_api_key != "a_preencher"
+      error_message = "Configure DATADOG_API_KEY antes de habilitar o Agent."
+    }
+  }
+
+  values = [yamlencode({
+    datadog = { apm = { socketEnabled = false } }
+    agents = { containers = {
+      agent      = { resources = { requests = { cpu = "100m", memory = "256Mi" }, limits = { memory = "512Mi" } } }
+      traceAgent = { resources = { requests = { cpu = "50m", memory = "128Mi" }, limits = { memory = "256Mi" } } }
+    } }
+    clusterAgent = { resources = { requests = { cpu = "50m", memory = "128Mi" }, limits = { memory = "256Mi" } } }
+  })]
+
+  set_sensitive {
     name  = "datadog.apiKey"
     value = var.datadog_api_key
   }
@@ -37,7 +54,7 @@ resource "helm_release" "datadog_agent" {
   }
 
   set {
-    name  = "datadog.apm.hostPort"
+    name  = "datadog.apm.port"
     value = "8126"
   }
 

@@ -15,3 +15,8 @@ variable "cluster_name" {
   type        = string
   default     = "oficina-gke-cluster"
 }
+
+variable "enabled" {
+  type    = bool
+  default = true
+}

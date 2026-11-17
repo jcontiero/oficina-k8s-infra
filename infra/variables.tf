@@ -30,3 +30,9 @@ variable "datadog_site" {
   type        = string
   default     = "us5.datadoghq.com"
 }
+
+variable "datadog_enabled" {
+  description = "Instala o Agent; exige chave válida em datadog_api_key"
+  type        = bool
+  default     = true
+}
