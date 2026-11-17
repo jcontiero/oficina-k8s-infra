@@ -15,12 +15,21 @@ jobs:
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: "1.9.0"
-      - name: Terraform Format
+      - name: Terraform Format (bootstrap)
+        run: terraform fmt -check -recursive
+        working-directory: bootstrap
+      - name: Terraform Init (bootstrap)
+        run: terraform init -backend=false
+        working-directory: bootstrap
+      - name: Terraform Validate (bootstrap)
+        run: terraform validate
+        working-directory: bootstrap
+      - name: Terraform Format (infra)
         run: terraform fmt -check -recursive
         working-directory: infra
-      - name: Terraform Init
+      - name: Terraform Init (infra)
         run: terraform init -backend=false
         working-directory: infra
-      - name: Terraform Validate
+      - name: Terraform Validate (infra)
         run: terraform validate
         working-directory: infra

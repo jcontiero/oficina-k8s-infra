@@ -1,0 +1,8 @@
+# Etapa B do bootstrap (habilitar somente após criar o bucket na Etapa A):
+# Renomeie para backend.tf e execute `terraform init -migrate-state`.
+terraform {
+  backend "gcs" {
+    bucket = "fiap-project-514922-tfstate"
+    prefix = "bootstrap"
+  }
+}

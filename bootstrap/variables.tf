@@ -9,3 +9,9 @@ variable "region" {
   type        = string
   default     = "us-east1"
 }
+
+variable "state_bucket_name" {
+  description = "Nome do bucket GCS para o backend Terraform da P7"
+  type        = string
+  default     = "fiap-project-514922-tfstate"
+}
