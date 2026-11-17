@@ -77,8 +77,10 @@ resource "google_iam_workload_identity_pool_provider" "github_provider" {
     "attribute.actor"            = "assertion.actor"
     "attribute.repository"       = "assertion.repository"
     "attribute.repository_owner" = "assertion.repository_owner"
+    "attribute.ref"              = "assertion.ref"
+    "attribute.environment"      = "assertion.environment"
   }
-  attribute_condition = "assertion.repository_owner == \"jcontiero\""
+  attribute_condition = "assertion.repository_owner == \"jcontiero\" && assertion.ref in [\"refs/heads/main\", \"refs/heads/homolog\"]"
 
   oidc {
     issuer_uri = "https://token.actions.githubusercontent.com"
@@ -91,10 +93,31 @@ resource "google_service_account" "platform_sa" {
   display_name = "GitHub Actions Platform SA"
 }
 
-# 6. Dar permissão de Editor (ou Owner) para a SA gerenciar o GCP
-resource "google_project_iam_member" "sa_owner" {
+# 6. Permissões granulares por domínio para a SA de CI/CD (sem roles/owner nem roles/editor)
+resource "google_project_iam_member" "sa_roles" {
+  for_each = toset([
+    "roles/compute.networkAdmin",
+    "roles/container.admin",
+    "roles/cloudsql.admin",
+    "roles/pubsub.admin",
+    "roles/datastore.owner",
+    "roles/secretmanager.admin",
+    "roles/artifactregistry.admin",
+    "roles/cloudfunctions.admin",
+    "roles/run.admin",
+    "roles/apigateway.admin",
+    "roles/servicemanagement.admin",
+    "roles/serviceusage.serviceUsageAdmin",
+    "roles/iam.serviceAccountAdmin",
+    "roles/iam.serviceAccountUser",
+    "roles/resourcemanager.projectIamAdmin",
+    "roles/storage.admin",
+    "roles/logging.admin",
+    "roles/monitoring.admin",
+  ])
+
   project = var.project_id
-  role    = "roles/owner" # Para o Tech Challenge, Owner simplifica os pacotes subsequentes
+  role    = each.key
   member  = "serviceAccount:${google_service_account.platform_sa.email}"
 }
 
