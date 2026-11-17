@@ -78,9 +78,8 @@ resource "google_iam_workload_identity_pool_provider" "github_provider" {
     "attribute.repository"       = "assertion.repository"
     "attribute.repository_owner" = "assertion.repository_owner"
     "attribute.ref"              = "assertion.ref"
-    "attribute.environment"      = "assertion.environment"
   }
-  attribute_condition = "assertion.repository_owner == \"jcontiero\" && assertion.ref in [\"refs/heads/main\", \"refs/heads/homolog\"]"
+  attribute_condition = "assertion.repository_owner == \"jcontiero\" && assertion.ref in [\"refs/heads/main\", \"refs/heads/homolog\"] && assertion.event_name in [\"workflow_dispatch\", \"push\"]"
 
   oidc {
     issuer_uri = "https://token.actions.githubusercontent.com"
