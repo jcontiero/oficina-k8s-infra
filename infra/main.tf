@@ -23,6 +23,7 @@ module "artifact_registry" {
 
 module "datadog" {
   source          = "./modules/datadog"
+  enabled         = var.datadog_enabled
   datadog_api_key = var.datadog_api_key
   datadog_site    = var.datadog_site
   cluster_name    = var.cluster_name
