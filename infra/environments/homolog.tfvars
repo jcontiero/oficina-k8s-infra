@@ -1,3 +1,2 @@
-project_id = "pos-fiap-2026"
-region = "us-east1"
-datadog_api_key = "a_preencher"
+project_id = "fiap-project-514922"
+region     = "us-east1"

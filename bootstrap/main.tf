@@ -23,13 +23,13 @@ resource "google_project_service" "apis" {
     "vpcaccess.googleapis.com",         # Serverless VPC Access
     "servicenetworking.googleapis.com", # Private Services Access
     "secretmanager.googleapis.com",
-    "iamcredentials.googleapis.com",    # Workload Identity Federation
+    "iamcredentials.googleapis.com", # Workload Identity Federation
     "artifactregistry.googleapis.com",
     "cloudfunctions.googleapis.com",
-    "run.googleapis.com",               # Cloud Run (usado pelo Functions v2)
+    "run.googleapis.com", # Cloud Run (usado pelo Functions v2)
     "cloudbuild.googleapis.com"
   ])
-  service = each.key
+  service            = each.key
   disable_on_destroy = false
 }
 

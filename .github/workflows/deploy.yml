@@ -1,17 +1,24 @@
 name: Terraform Deploy
 
 on:
-  push:
-    branches:
-      - homolog
-      - main
+  workflow_dispatch:
+    inputs:
+      confirm_cloud_apply:
+        description: "Digite 'true' para autorizar o terraform apply na plataforma compartilhada (GCP)"
+        required: true
+        default: "false"
 
 permissions:
   id-token: write
   contents: read
 
+concurrency:
+  group: terraform-k8s-infra-shared
+  cancel-in-progress: false
+
 jobs:
-  deploy:
+  plan:
+    name: Terraform Plan (Shared Platform)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -19,8 +26,8 @@ jobs:
       - name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v2
         with:
-          workload_identity_provider: 'projects/1064199753061/locations/global/workloadIdentityPools/github-actions-pool/providers/github-actions-provider'
-          service_account: 'github-actions-sa@pos-fiap-2026.iam.gserviceaccount.com'
+          workload_identity_provider: 'projects/936717667971/locations/global/workloadIdentityPools/github-actions-pool/providers/github-actions-provider'
+          service_account: 'github-actions-sa@fiap-project-514922.iam.gserviceaccount.com'
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
@@ -31,12 +38,46 @@ jobs:
         run: terraform init
         working-directory: infra
 
-      - name: Terraform Workspace Select
-        run: |
-          WORKSPACE=${GITHUB_REF_NAME}
-          terraform workspace select $WORKSPACE || terraform workspace new $WORKSPACE
+      - name: Select Canonical Shared Workspace
+        run: terraform workspace select main || terraform workspace new main
+        working-directory: infra
+
+      - name: Terraform Plan
+        env:
+          TF_VAR_datadog_api_key: ${{ secrets.DATADOG_API_KEY }}
+        run: terraform plan -var-file="environments/main.tfvars"
+        working-directory: infra
+
+  apply:
+    name: Terraform Apply (Production Shared Platform)
+    runs-on: ubuntu-latest
+    needs: plan
+    if: github.event_name == 'workflow_dispatch' && inputs.confirm_cloud_apply == 'true' && github.ref == 'refs/heads/main'
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: 'projects/936717667971/locations/global/workloadIdentityPools/github-actions-pool/providers/github-actions-provider'
+          service_account: 'github-actions-sa@fiap-project-514922.iam.gserviceaccount.com'
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.9.0"
+
+      - name: Terraform Init
+        run: terraform init
+        working-directory: infra
+
+      - name: Select Canonical Shared Workspace
+        run: terraform workspace select main || terraform workspace new main
         working-directory: infra
 
       - name: Terraform Apply
-        run: terraform apply -auto-approve -var-file="environments/${GITHUB_REF_NAME}.tfvars"
+        env:
+          TF_VAR_datadog_api_key: ${{ secrets.DATADOG_API_KEY }}
+        run: terraform apply -auto-approve -var-file="environments/main.tfvars"
         working-directory: infra

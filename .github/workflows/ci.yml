@@ -2,9 +2,9 @@ name: Terraform CI
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "main", "homolog" ]
   pull_request:
-    branches: [ "main" ]
+    branches: [ "main", "homolog" ]
 
 jobs:
   validate:
@@ -16,7 +16,8 @@ jobs:
         with:
           terraform_version: "1.9.0"
       - name: Terraform Format
-        run: terraform fmt -check -recursive || echo "Formatting issues found, run terraform fmt"
+        run: terraform fmt -check -recursive
+        working-directory: infra
       - name: Terraform Init
         run: terraform init -backend=false
         working-directory: infra
