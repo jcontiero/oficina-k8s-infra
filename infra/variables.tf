@@ -19,10 +19,10 @@ variable "vpc_name" {
 }
 
 variable "datadog_api_key" {
-  description = "Datadog API Key"
+  description = "Datadog API Key (restrita ao Agent)"
   type        = string
   sensitive   = true
-  default     = "a_preencher"
+  default     = ""
 }
 
 variable "datadog_site" {

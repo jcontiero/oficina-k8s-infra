@@ -1,4 +1,5 @@
 resource "helm_release" "datadog_agent" {
+  count            = var.datadog_api_key != "" && var.datadog_api_key != "a_preencher" ? 1 : 0
   name             = "datadog"
   repository       = "https://helm.datadoghq.com"
   chart            = "datadog"

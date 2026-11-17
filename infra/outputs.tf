@@ -1,6 +1,16 @@
+output "vpc_network_id" {
+  value       = module.vpc.network_id
+  description = "ID da VPC para consumo pelo Cloud SQL / Private Service Access"
+}
+
 output "vpc_network_name" {
   value       = module.vpc.network_name
   description = "Nome da VPC para ser consumida pelo modulo de banco e serverless"
+}
+
+output "gke_cluster_location" {
+  value       = "${var.region}-b"
+  description = "Localizacao zonal do cluster GKE"
 }
 
 output "serverless_connector_name" {
