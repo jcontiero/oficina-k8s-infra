@@ -11,7 +11,7 @@ module "gke" {
   cluster_name = var.cluster_name
   network_id   = module.vpc.network_id
   subnet_name  = module.vpc.subnet_name
-  node_count   = 1
+  node_count   = 2
   machine_type = "e2-medium"
 }
 
