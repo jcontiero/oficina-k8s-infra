@@ -90,10 +90,25 @@ jobs:
                   and actions == ['delete', 'create']
                   and change.get('action_reason') == 'replace_because_tainted'
               )
-              if not in_scope or ('delete' in actions and not recover_tainted_agent):
+              recover_failed_capacity_pool = (
+                  scope == 'gke_capacity'
+                  and address == 'module.gke.google_container_node_pool.capacity_nodes'
+                  and actions == ['delete', 'create']
+                  and change.get('action_reason') in {
+                      'replace_because_tainted',
+                      'replace_because_cannot_update',
+                  }
+              )
+              if not in_scope or (
+                  'delete' in actions
+                  and not recover_tainted_agent
+                  and not recover_failed_capacity_pool
+              ):
                   raise SystemExit(f'Alteração fora do escopo: {address} {actions}')
               if recover_tainted_agent:
                   print('Recuperação permitida apenas para o release Datadog marcado como tainted após apply interrompido.')
+              if recover_failed_capacity_pool:
+                  print('Substituição permitida somente para a pool capacity que falhou sem criar nós, usando disco padrão.')
               print(address, actions)
           PYTHON
       - name: Apply exact saved Datadog plan
