@@ -7,6 +7,14 @@ on:
         description: "Digite 'true' para autorizar o terraform apply na plataforma compartilhada (GCP)"
         required: true
         default: "false"
+      apply_scope:
+        description: "Escopo do plano da plataforma compartilhada"
+        type: choice
+        required: true
+        default: datadog
+        options:
+          - datadog
+          - gke_capacity
 
 permissions:
   id-token: write
@@ -18,7 +26,7 @@ concurrency:
 
 jobs:
   plan:
-    name: Datadog Plan and Apply
+    name: Platform Plan and Apply
     if: github.ref == 'refs/heads/main'
     environment: production
     runs-on: ubuntu-latest
@@ -43,30 +51,48 @@ jobs:
       - name: Terraform Plan
         env:
           TF_VAR_datadog_api_key: ${{ secrets.DATADOG_API_KEY }}
-        run: terraform plan -input=false -var-file="environments/main.tfvars" -target=module.datadog -out=/tmp/datadog.tfplan
+          APPLY_SCOPE: ${{ inputs.apply_scope }}
+        run: |
+          if [[ "$APPLY_SCOPE" == "datadog" ]]; then
+            terraform plan -input=false -var-file="environments/main.tfvars" -target=module.datadog -out=/tmp/platform.tfplan
+          else
+            terraform plan -input=false -var-file="environments/main.tfvars" -target=module.gke.google_container_node_pool.primary_nodes -out=/tmp/platform.tfplan
+          fi
         working-directory: infra
 
       - name: Verify limited scope
+        env:
+          APPLY_SCOPE: ${{ inputs.apply_scope }}
         working-directory: infra
         run: |
-          terraform show -json /tmp/datadog.tfplan > /tmp/datadog-plan.json
+          terraform show -json /tmp/platform.tfplan > /tmp/platform-plan.json
           python - <<'PYTHON'
           import json
-          with open('/tmp/datadog-plan.json') as source:
+          import os
+          with open('/tmp/platform-plan.json') as source:
               changes = json.load(source).get('resource_changes', [])
+          scope = os.environ['APPLY_SCOPE']
           for change in changes:
               actions = change['change']['actions']
               if actions in [['no-op'], ['read']]:
                   continue
               address = change['address']
-              if not address.startswith('module.datadog.') or 'delete' in actions:
+              if scope == 'datadog':
+                  in_scope = address.startswith('module.datadog.')
+              else:
+                  in_scope = address == 'module.gke.google_container_node_pool.primary_nodes'
+              if not in_scope or 'delete' in actions:
                   raise SystemExit(f'Alteração fora do escopo: {address} {actions}')
               print(address, actions)
           PYTHON
       - name: Apply exact saved Datadog plan
-        if: inputs.confirm_cloud_apply == 'true'
-        run: terraform apply -input=false /tmp/datadog.tfplan
+        if: inputs.confirm_cloud_apply == 'true' && inputs.apply_scope == 'datadog'
+        run: terraform apply -input=false /tmp/platform.tfplan
+        working-directory: infra
+      - name: Apply exact saved GKE capacity plan
+        if: inputs.confirm_cloud_apply == 'true' && inputs.apply_scope == 'gke_capacity'
+        run: terraform apply -input=false /tmp/platform.tfplan
         working-directory: infra
       - name: Remove sensitive temporary plan
         if: always()
-        run: rm -f /tmp/datadog.tfplan /tmp/datadog-plan.json
+        run: rm -f /tmp/platform.tfplan /tmp/platform-plan.json
