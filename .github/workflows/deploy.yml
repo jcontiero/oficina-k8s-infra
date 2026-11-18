@@ -56,7 +56,7 @@ jobs:
           if [[ "$APPLY_SCOPE" == "datadog" ]]; then
             terraform plan -input=false -var-file="environments/main.tfvars" -target=module.datadog -out=/tmp/platform.tfplan
           else
-            terraform plan -input=false -var-file="environments/main.tfvars" -target=module.gke.google_container_node_pool.primary_nodes -out=/tmp/platform.tfplan
+            terraform plan -input=false -var-file="environments/main.tfvars" -target=module.gke.google_container_node_pool.primary_nodes -target=module.gke.google_container_node_pool.capacity_nodes -out=/tmp/platform.tfplan
           fi
         working-directory: infra
 
@@ -80,7 +80,10 @@ jobs:
               if scope == 'datadog':
                   in_scope = address.startswith('module.datadog.')
               else:
-                  in_scope = address == 'module.gke.google_container_node_pool.primary_nodes'
+                  in_scope = address in {
+                      'module.gke.google_container_node_pool.primary_nodes',
+                      'module.gke.google_container_node_pool.capacity_nodes',
+                  }
               recover_tainted_agent = (
                   scope == 'datadog'
                   and address == 'module.datadog.helm_release.datadog_agent[0]'
