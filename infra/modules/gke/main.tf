@@ -55,3 +55,32 @@ resource "google_container_node_pool" "primary_nodes" {
     ]
   }
 }
+
+resource "google_container_node_pool" "capacity_nodes" {
+  name       = "${var.cluster_name}-capacity"
+  location   = "${var.region}-b"
+  cluster    = google_container_cluster.primary.name
+  node_count = 1
+
+  node_config {
+    preemptible  = true
+    machine_type = "e2-standard-2"
+
+    oauth_scopes = [
+      "https://www.googleapis.com/auth/cloud-platform"
+    ]
+
+    workload_metadata_config {
+      mode = "GKE_METADATA"
+    }
+
+    labels = {
+      env = "shared"
+    }
+  }
+
+  management {
+    auto_repair  = true
+    auto_upgrade = true
+  }
+}
