@@ -17,8 +17,8 @@ resource "helm_release" "datadog_agent" {
   values = [yamlencode({
     datadog = { apm = { socketEnabled = false } }
     agents = { containers = {
-      agent      = { resources = { requests = { cpu = "100m", memory = "256Mi" }, limits = { memory = "512Mi" } } }
-      traceAgent = { resources = { requests = { cpu = "50m", memory = "128Mi" }, limits = { memory = "256Mi" } } }
+      agent      = { resources = { requests = { cpu = "75m", memory = "256Mi" }, limits = { cpu = "150m", memory = "512Mi" } } }
+      traceAgent = { resources = { requests = { cpu = "10m", memory = "128Mi" }, limits = { cpu = "50m", memory = "256Mi" } } }
     } }
     clusterAgent = { resources = { requests = { cpu = "50m", memory = "128Mi" }, limits = { memory = "256Mi" } } }
   })]

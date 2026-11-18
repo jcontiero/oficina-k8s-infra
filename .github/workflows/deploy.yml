@@ -81,8 +81,16 @@ jobs:
                   in_scope = address.startswith('module.datadog.')
               else:
                   in_scope = address == 'module.gke.google_container_node_pool.primary_nodes'
-              if not in_scope or 'delete' in actions:
+              recover_tainted_agent = (
+                  scope == 'datadog'
+                  and address == 'module.datadog.helm_release.datadog_agent[0]'
+                  and actions == ['delete', 'create']
+                  and change.get('action_reason') == 'replace_because_tainted'
+              )
+              if not in_scope or ('delete' in actions and not recover_tainted_agent):
                   raise SystemExit(f'Alteração fora do escopo: {address} {actions}')
+              if recover_tainted_agent:
+                  print('Recuperação permitida apenas para o release Datadog marcado como tainted após apply interrompido.')
               print(address, actions)
           PYTHON
       - name: Apply exact saved Datadog plan
